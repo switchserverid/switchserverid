@@ -1,10 +1,84 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <title>Tampilan Pilih Server</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Pilih Server</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #tampilan-situs {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 15px;
+            min-height: 300px;
+            overflow: auto;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h2>Konten dari Pilih-Server</h2>
-    <iframe src="https://pilih-server.webnode.page/" width="100%" height="600px" frameborder="0"></iframe>
+
+<div class="container">
+    <h2>Data dari Pilih Server</h2>
+    <p>Status: <span id="status" class="loading">Sedang mengambil data...</span></p>
+    
+    <div id="tampilan-situs">
+        </div>
+</div>
+
+<script>
+    const targetUrl = "https://pilih-server.webnode.page/";
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+    const statusEl = document.getElementById('status');
+    const displayEl = document.getElementById('tampilan-situs');
+
+    fetch(proxyUrl)
+        .then(response => {
+            if (response.ok) return response.json();
+            throw new Error('Gagal terhubung ke proxy.');
+        })
+        .then(data => {
+            if (data.contents) {
+                // Menampilkan konten ke dalam div
+                displayEl.innerHTML = data.contents;
+                statusEl.innerText = "Berhasil dimuat!";
+                statusEl.className = "";
+                
+                // Menyesuaikan link agar tetap bisa diklik (opsional)
+                const links = displayEl.querySelectorAll('a');
+                links.forEach(link => {
+                    if (link.href.includes(window.location.host)) {
+                        const originalPath = link.href.split(window.location.host).pop();
+                        link.href = "https://pilih-server.webnode.page" + originalPath;
+                    }
+                });
+            } else {
+                throw new Error('Konten kosong atau tidak ditemukan.');
+            }
+        })
+        .catch(err => {
+            statusEl.innerText = "Error: " + err.message;
+            statusEl.className = "error";
+            displayEl.innerHTML = "<p>Gagal mengambil data. Pastikan URL benar atau coba segarkan halaman.</p>";
+        });
+</script>
+
 </body>
 </html>
